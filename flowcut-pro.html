@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowCut Pro - Professional Video Editor</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #667eea;
+      --secondary: #764ba2;
+      --dark-bg: #0a0e27;
+      --dark-surface: #151b3d;
+      --dark-elevated: #1e2749;
+      --accent-cyan: #00d4ff;
+      --accent-magenta: #ff006e;
+      --text-primary: #ffffff;
+      --text-secondary: #a8b2d1;
+      --text-muted: #6b7a99;
+      --success: #00ff88;
+      --warning: #ffaa00;
+      --danger: #ff3366;
+      --timeline-bg: #0d1229;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--dark-bg);
+      color: var(--text-primary);
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* Main Layout */
+    .app-container {
+      display: grid;
+      grid-template-rows: 60px 1fr 200px;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--dark-surface), var(--dark-elevated));
+      border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      position: relative;
+      z-index: 100;
+    }
+
+    .logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 24px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--primary), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .mode-selector {
+      display: flex;
+      gap: 5px;
+      background: var(--dark-bg);
+      padding: 5px;
+      border-radius: 8px;
+      border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .mode-btn {
+      padding: 8px 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .mode-btn:hover {
+      background: rgba(102, 126, 234, 0.1);
+      color: var(--text-primary);
+    }
+
+    .mode-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .action-btn {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border: none;
+      color: white;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    .action-btn.secondary {
+      background: transparent;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+
+    /* Workspace */
+    .workspace {
+      display: grid;
+      grid-template-columns: 250px 1fr 300px;
+      gap: 0;
+      background: var(--dark-bg);
+      overflow: hidden;
+    }
+
+    /* Left Panel - Media Library */
+    .media-panel {
+      background: var(--dark-surface);
+      border-right: 2px solid rgba(102, 126, 234, 0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-secondary);
+    }
+
+    .media-grid {
+      padding: 15px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .media-item {
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+      border-radius: 8px;
+      border: 2px dashed rgba(102, 126, 234, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .media-item:hover {
+      border-color: var(--primary);
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .media-item.has-video {
+      background: var(--dark-elevated);
+      border-style: solid;
+    }
+
+    .media-item svg {
+      width: 30px;
+      height: 30px;
+      opacity: 0.5;
+    }
+
+    .upload-zone {
+      padding: 30px;
+      margin: 15px;
+      border: 3px dashed rgba(102, 126, 234, 0.3);
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--primary);
+      background: rgba(102, 126, 234, 0.05);
+    }
+
+    .upload-zone svg {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 10px;
+      opacity: 0.6;
+    }
+
+    /* Center - Preview & Canvas */
+    .preview-panel {
+      background: var(--dark-bg);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .preview-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      position: relative;
+    }
+
+    .preview-canvas {
+      width: 100%;
+      max-width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preview-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+    }
+
+    .preview-placeholder svg {
+      width: 80px;
+      height: 80px;
+      opacity: 0.3;
+    }
+
+    .preview-video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .playback-controls {
+      padding: 20px 30px;
+      background: var(--dark-surface);
+      border-top: 1px solid rgba(102, 126, 234, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .play-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .play-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    .play-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .time-display {
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      color: var(--text-primary);
+      min-width: 180px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 6px;
+      background: rgba(102, 126, 234, 0.2);
+      border-radius: 3px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent-cyan));
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.1s linear;
+      position: relative;
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      right: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Right Panel - Properties */
+    .properties-panel {
+      background: var(--dark-surface);
+      border-left: 2px solid rgba(102, 126, 234, 0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .properties-content {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .property-group {
+      margin-bottom: 30px;
+    }
+
+    .property-group h3 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-secondary);
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .property-item {
+      margin-bottom: 15px;
+    }
+
+    .property-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .property-slider {
+      width: 100%;
+      height: 4px;
+      background: rgba(102, 126, 234, 0.2);
+      border-radius: 2px;
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    .property-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    }
+
+    .effect-btn {
+      width: 100%;
+      padding: 12px;
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      color: var(--text-primary);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .effect-btn:hover {
+      background: rgba(102, 126, 234, 0.2);
+      border-color: var(--primary);
+    }
+
+    /* Timeline */
+    .timeline-panel {
+      background: var(--timeline-bg);
+      border-top: 2px solid rgba(102, 126, 234, 0.3);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .timeline-header {
+      padding: 10px 20px;
+      border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--dark-surface);
+    }
+
+    .timeline-tools {
+      display: flex;
+      gap: 10px;
+    }
+
+    .tool-btn {
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      color: var(--text-secondary);
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .tool-btn:hover,
+    .tool-btn.active {
+      background: rgba(102, 126, 234, 0.2);
+      border-color: var(--primary);
+      color: var(--text-primary);
+    }
+
+    .timeline-content {
+      flex: 1;
+      position: relative;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .timeline-tracks {
+      min-width: 100%;
+      height: 100%;
+      position: relative;
+      padding: 10px 20px;
+    }
+
+    .track {
+      height: 60px;
+      background: rgba(102, 126, 234, 0.05);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      position: relative;
+      border: 1px solid rgba(102, 126, 234, 0.15);
+    }
+
+    .track-label {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .clip {
+      position: absolute;
+      height: 80%;
+      top: 10%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 6px;
+      cursor: move;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      transition: transform 0.2s ease;
+      overflow: hidden;
+    }
+
+    .clip:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
+    }
+
+    .clip-handle {
+      position: absolute;
+      width: 8px;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      cursor: ew-resize;
+    }
+
+    .clip-handle.left {
+      left: 0;
+    }
+
+    .clip-handle.right {
+      right: 0;
+    }
+
+    .playhead {
+      position: absolute;
+      width: 2px;
+      height: 100%;
+      background: var(--accent-cyan);
+      top: 0;
+      left: 20px;
+      pointer-events: none;
+      box-shadow: 0 0 10px var(--accent-cyan);
+    }
+
+    .playhead::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--accent-cyan);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .media-item,
+    .effect-btn,
+    .tool-btn {
+      animation: fadeIn 0.4s ease backwards;
+    }
+
+    .media-item:nth-child(1) { animation-delay: 0.05s; }
+    .media-item:nth-child(2) { animation-delay: 0.1s; }
+    .media-item:nth-child(3) { animation-delay: 0.15s; }
+    .media-item:nth-child(4) { animation-delay: 0.2s; }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--dark-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(102, 126, 234, 0.3);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(102, 126, 234, 0.5);
+    }
+
+    /* Responsive Warning */
+    @media (max-width: 900px) {
+      body::before {
+        content: "FlowCut Pro requires a desktop screen (900px+)";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: var(--danger);
+        color: white;
+        text-align: center;
+        padding: 15px;
+        font-weight: bold;
+        z-index: 10000;
+      }
+    }
+
+    .upload-input {
+      display: none;
+    }
+
+    .notification {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: var(--dark-elevated);
+      border: 1px solid var(--primary);
+      border-radius: 8px;
+      padding: 15px 20px;
+      color: var(--text-primary);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.3s ease;
+      z-index: 1000;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">FlowCut Pro</div>
+    
+    <div class="mode-selector">
+      <button class="mode-btn active" data-mode="beginner">Beginner</button>
+      <button class="mode-btn" data-mode="pro">Pro</button>
+      <button class="mode-btn" data-mode="expert">Expert</button>
+    </div>
+
+    <div class="header-actions">
+      <button class="action-btn secondary">Import</button>
+      <button class="action-btn" onclick="exportVideo()">Export</button>
+    </div>
+  </div>
+
+  <!-- Workspace -->
+  <div class="workspace">
+    <!-- Left Panel - Media Library -->
+    <div class="media-panel">
+      <div class="panel-header">Media Library</div>
+      <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+        <svg fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+        </svg>
+        <div style="font-size: 13px; color: var(--text-secondary);">Click to add media</div>
+      </div>
+      <input type="file" id="fileInput" class="upload-input" accept="video/*" multiple onchange="handleFileUpload(event)">
+      <div class="media-grid" id="mediaGrid">
+        <div class="media-item" data-sample="1" onclick="loadSampleVideo(1)">
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+        <div class="media-item" data-sample="2" onclick="loadSampleVideo(2)">
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center - Preview -->
+    <div class="preview-panel">
+      <div class="preview-container">
+        <div class="preview-canvas" id="previewCanvas">
+          <div class="preview-placeholder" id="previewPlaceholder">
+            <svg fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+            </svg>
+            <div style="color: var(--text-muted); font-size: 14px;">Add media to start editing</div>
+          </div>
+          <video id="previewVideo" class="preview-video" style="display: none;"></video>
+          <canvas id="effectCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none;"></canvas>
+        </div>
+      </div>
+
+      <div class="playback-controls">
+        <button class="play-btn" id="playBtn" onclick="togglePlay()">
+          <svg id="playIcon" fill="white" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+          <svg id="pauseIcon" fill="white" viewBox="0 0 24 24" style="display: none;">
+            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+          </svg>
+        </button>
+        
+        <div class="time-display" id="timeDisplay">00:00 / 00:00</div>
+        
+        <div class="progress-bar" id="progressBar" onclick="seekVideo(event)">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel - Properties -->
+    <div class="properties-panel">
+      <div class="panel-header">Properties</div>
+      <div class="properties-content">
+        <div class="property-group">
+          <h3>Transform</h3>
+          <div class="property-item">
+            <label class="property-label">Scale</label>
+            <input type="range" class="property-slider" min="50" max="200" value="100" id="scaleSlider" oninput="updateEffect('scale', this.value)">
+          </div>
+          <div class="property-item">
+            <label class="property-label">Rotation</label>
+            <input type="range" class="property-slider" min="0" max="360" value="0" id="rotationSlider" oninput="updateEffect('rotation', this.value)">
+          </div>
+        </div>
+
+        <div class="property-group">
+          <h3>Color</h3>
+          <div class="property-item">
+            <label class="property-label">Brightness</label>
+            <input type="range" class="property-slider" min="0" max="200" value="100" id="brightnessSlider" oninput="updateEffect('brightness', this.value)">
+          </div>
+          <div class="property-item">
+            <label class="property-label">Contrast</label>
+            <input type="range" class="property-slider" min="0" max="200" value="100" id="contrastSlider" oninput="updateEffect('contrast', this.value)">
+          </div>
+          <div class="property-item">
+            <label class="property-label">Saturation</label>
+            <input type="range" class="property-slider" min="0" max="200" value="100" id="saturationSlider" oninput="updateEffect('saturation', this.value)">
+          </div>
+        </div>
+
+        <div class="property-group">
+          <h3>Effects</h3>
+          <button class="effect-btn" onclick="applyEffect('blur')">Blur</button>
+          <button class="effect-btn" onclick="applyEffect('grayscale')">Grayscale</button>
+          <button class="effect-btn" onclick="applyEffect('sepia')">Sepia</button>
+          <button class="effect-btn" onclick="applyEffect('invert')">Invert</button>
+          <button class="effect-btn" onclick="resetEffects()">Reset All</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="timeline-panel">
+    <div class="timeline-header">
+      <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">TIMELINE</div>
+      <div class="timeline-tools">
+        <button class="tool-btn active">Select</button>
+        <button class="tool-btn">Cut</button>
+        <button class="tool-btn">Split</button>
+        <button class="tool-btn">Trim</button>
+      </div>
+    </div>
+    <div class="timeline-content">
+      <div class="timeline-tracks" id="timelineTracks">
+        <div class="playhead" id="playhead"></div>
+        <div class="track">
+          <span class="track-label">Video 1</span>
+        </div>
+        <div class="track">
+          <span class="track-label">Audio 1</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // State
+  const state = {
+    currentVideo: null,
+    isPlaying: false,
+    currentMode: 'beginner',
+    effects: {
+      scale: 100,
+      rotation: 0,
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      blur: 0,
+      grayscale: 0,
+      sepia: 0,
+      invert: 0
+    },
+    clips: []
+  };
+
+  // DOM Elements
+  const previewVideo = document.getElementById('previewVideo');
+  const previewPlaceholder = document.getElementById('previewPlaceholder');
+  const playBtn = document.getElementById('playBtn');
+  const playIcon = document.getElementById('playIcon');
+  const pauseIcon = document.getElementById('pauseIcon');
+  const timeDisplay = document.getElementById('timeDisplay');
+  const progressFill = document.getElementById('progressFill');
+  const playhead = document.getElementById('playhead');
+
+  // Mode Switching
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      state.currentMode = this.dataset.mode;
+      showNotification(`Switched to ${this.dataset.mode.toUpperCase()} mode`);
+    });
+  });
+
+  // File Upload
+  function handleFileUpload(event) {
+    const files = event.target.files;
+    if (files.length > 0) {
+      const file = files[0];
+      const url = URL.createObjectURL(file);
+      loadVideo(url, file.name);
+      showNotification('Video loaded successfully');
+    }
+  }
+
+  // Load Sample Video
+  function loadSampleVideo(index) {
+    // Create a simple gradient video using canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = 1920;
+    canvas.height = 1080;
+    const ctx = canvas.getContext('2d');
+    
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    if (index === 1) {
+      gradient.addColorStop(0, '#667eea');
+      gradient.addColorStop(1, '#764ba2');
+    } else {
+      gradient.addColorStop(0, '#00d4ff');
+      gradient.addColorStop(1, '#ff006e');
+    }
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 120px Orbitron';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`Sample Video ${index}`, canvas.width / 2, canvas.height / 2);
+    
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      previewVideo.poster = url;
+      previewPlaceholder.style.display = 'none';
+      previewVideo.style.display = 'block';
+      
+      // Add clip to timeline
+      addClipToTimeline(`Sample ${index}`, 100 + (state.clips.length * 220), 200);
+      
+      showNotification(`Loaded Sample Video ${index}`);
+    });
+  }
+
+  // Load Video
+  function loadVideo(url, name) {
+    previewVideo.src = url;
+    previewVideo.load();
+    previewPlaceholder.style.display = 'none';
+    previewVideo.style.display = 'block';
+    state.currentVideo = url;
+    
+    previewVideo.addEventListener('loadedmetadata', function() {
+      updateTimeDisplay();
+      addClipToTimeline(name || 'Video Clip', 100 + (state.clips.length * 220), 200);
+    });
+  }
+
+  // Playback Controls
+  function togglePlay() {
+    if (!state.currentVideo && previewVideo.src === '') {
+      showNotification('Please add a video first');
+      return;
+    }
+
+    if (state.isPlaying) {
+      previewVideo.pause();
+      playIcon.style.display = 'block';
+      pauseIcon.style.display = 'none';
+    } else {
+      previewVideo.play();
+      playIcon.style.display = 'none';
+      pauseIcon.style.display = 'block';
+    }
+    state.isPlaying = !state.isPlaying;
+  }
+
+  // Update Time Display
+  function updateTimeDisplay() {
+    const current = formatTime(previewVideo.currentTime || 0);
+    const duration = formatTime(previewVideo.duration || 0);
+    timeDisplay.textContent = `${current} / ${duration}`;
+  }
+
+  function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+
+  // Progress Bar
+  previewVideo.addEventListener('timeupdate', function() {
+    const progress = (previewVideo.currentTime / previewVideo.duration) * 100;
+    progressFill.style.width = progress + '%';
+    playhead.style.left = (20 + (progress * 5)) + 'px';
+    updateTimeDisplay();
+  });
+
+  function seekVideo(event) {
+    if (!previewVideo.duration) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const percentage = x / rect.width;
+    previewVideo.currentTime = percentage * previewVideo.duration;
+  }
+
+  // Effects
+  function updateEffect(type, value) {
+    state.effects[type] = value;
+    applyAllEffects();
+  }
+
+  function applyEffect(type) {
+    switch(type) {
+      case 'blur':
+        state.effects.blur = state.effects.blur > 0 ? 0 : 5;
+        break;
+      case 'grayscale':
+        state.effects.grayscale = state.effects.grayscale > 0 ? 0 : 100;
+        break;
+      case 'sepia':
+        state.effects.sepia = state.effects.sepia > 0 ? 0 : 100;
+        break;
+      case 'invert':
+        state.effects.invert = state.effects.invert > 0 ? 0 : 100;
+        break;
+    }
+    applyAllEffects();
+    showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} ${state.effects[type] > 0 ? 'applied' : 'removed'}`);
+  }
+
+  function applyAllEffects() {
+    const scale = state.effects.scale / 100;
+    const rotation = state.effects.rotation;
+    const brightness = state.effects.brightness / 100;
+    const contrast = state.effects.contrast / 100;
+    const saturation = state.effects.saturation / 100;
+    const blur = state.effects.blur;
+    const grayscale = state.effects.grayscale / 100;
+    const sepia = state.effects.sepia / 100;
+    const invert = state.effects.invert / 100;
+
+    previewVideo.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+    previewVideo.style.filter = `
+      brightness(${brightness})
+      contrast(${contrast})
+      saturate(${saturation})
+      blur(${blur}px)
+      grayscale(${grayscale})
+      sepia(${sepia})
+      invert(${invert})
+    `;
+  }
+
+  function resetEffects() {
+    state.effects = {
+      scale: 100,
+      rotation: 0,
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      blur: 0,
+      grayscale: 0,
+      sepia: 0,
+      invert: 0
+    };
+    
+    document.getElementById('scaleSlider').value = 100;
+    document.getElementById('rotationSlider').value = 0;
+    document.getElementById('brightnessSlider').value = 100;
+    document.getElementById('contrastSlider').value = 100;
+    document.getElementById('saturationSlider').value = 100;
+    
+    applyAllEffects();
+    showNotification('All effects reset');
+  }
+
+  // Timeline
+  function addClipToTimeline(name, left, width) {
+    const track = document.querySelector('.track');
+    const clip = document.createElement('div');
+    clip.className = 'clip';
+    clip.style.left = left + 'px';
+    clip.style.width = width + 'px';
+    clip.textContent = name;
+    
+    // Add resize handles
+    const leftHandle = document.createElement('div');
+    leftHandle.className = 'clip-handle left';
+    const rightHandle = document.createElement('div');
+    rightHandle.className = 'clip-handle right';
+    
+    clip.appendChild(leftHandle);
+    clip.appendChild(rightHandle);
+    
+    // Make draggable
+    let isDragging = false;
+    let startX, startLeft;
+    
+    clip.addEventListener('mousedown', function(e) {
+      if (e.target.classList.contains('clip-handle')) return;
+      isDragging = true;
+      startX = e.clientX;
+      startLeft = parseInt(clip.style.left);
+      e.preventDefault();
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+      if (!isDragging) return;
+      const deltaX = e.clientX - startX;
+      const newLeft = Math.max(100, startLeft + deltaX);
+      clip.style.left = newLeft + 'px';
+    });
+    
+    document.addEventListener('mouseup', function() {
+      isDragging = false;
+    });
+    
+    track.appendChild(clip);
+    state.clips.push({ element: clip, name: name });
+  }
+
+  // Export
+  function exportVideo() {
+    showNotification('Exporting video... (Demo mode - no actual export)');
+    setTimeout(() => {
+      showNotification('Export complete! Video saved to downloads.');
+    }, 2000);
+  }
+
+  // Notifications
+  function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.animation = 'slideIn 0.3s ease reverse';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  // Initialize
+  showNotification('Welcome to FlowCut Pro!');
+</script>
+
+</body>
+</html>
